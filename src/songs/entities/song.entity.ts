@@ -15,7 +15,7 @@ export class SongEntity {
   @Column({ nullable: false, type: 'int' })
   level: number;
 
-  @Column({ nullable: false, type: 'int' })
+  @Column({ nullable: false, type: 'int', name: 'perceived_level' })
   perceivedLevel: number;
 
   @Column({

@@ -9,7 +9,7 @@ export const dataSourceOptions: DataSourceOptions = {
   database: 'echoes',
   entities: [__dirname + '/../**/*.entity.{js,ts}'],
   synchronize: false,
-  migrations: [__dirname + '/../migrations/*.{js,ts}'],
+  migrations: [__dirname + '/../database/migrations/*.{js,ts}'],
 };
 const dataSource = new DataSource(dataSourceOptions);
 

@@ -1,8 +1,5 @@
+import { Version } from '@echoes/core';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-
-enum Version {
-  ExceedToZero = 'Exceed to Zero',
-}
 
 @Entity('songs')
 export class SongEntity {

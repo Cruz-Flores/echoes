@@ -1,4 +1,10 @@
-import { IsNumber, IsUUID, IsEnum, IsNotEmpty } from 'class-validator';
+import {
+  IsNumber,
+  IsUUID,
+  IsEnum,
+  IsNotEmpty,
+  IsString,
+} from 'class-validator';
 import { Version } from '@echoes/core';
 
 export class CreateSongDTO {
@@ -16,5 +22,9 @@ export class CreateSongDTO {
 
   @IsEnum(Version)
   @IsNotEmpty()
-  readonly type: string;
+  readonly version: Version;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly name: string;
 }

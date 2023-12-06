@@ -10,6 +10,8 @@ export const dataSourceOptions: DataSourceOptions = {
   entities: [__dirname + '/../**/*.entity.{js,ts}'],
   synchronize: false,
   migrations: [__dirname + '/../database/migrations/*.{js,ts}'],
+  // TODO: Remove logging in production
+  logging: ['error'],
 };
 const dataSource = new DataSource(dataSourceOptions);
 

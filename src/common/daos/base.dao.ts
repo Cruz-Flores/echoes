@@ -5,6 +5,8 @@ import {
   Repository,
 } from 'typeorm';
 
+export type FindOneParams<Entity> = FindOneOptions<Entity>;
+
 export abstract class BaseDAO<Entity> {
   protected constructor(protected _baseRepository: Repository<Entity>) {}
 

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Version } from '@echoes/core';
 
 import { FindOneParams } from '../common/daos/base.dao';
@@ -31,12 +31,7 @@ export class SongService {
     return this.songDao.get();
   }
 
-  async getOne(params: FindOneParams<SongEntity>) {
-    const song = await this.songDao.getOne(params);
-    if (!song) {
-      throw new NotFoundException(`Song with not found`);
-    }
-
-    return song;
+  getOne(params: FindOneParams<SongEntity>) {
+    return this.songDao.getOne(params);
   }
 }

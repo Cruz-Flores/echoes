@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 
 import { CreateSongDTO } from './dtos/create-song.dto';
 import { SongService } from './song.service';
@@ -16,5 +16,10 @@ export class SongsController {
       version,
       name,
     });
+  }
+
+  @Get()
+  getAll() {
+    return this.songService.getAll();
   }
 }

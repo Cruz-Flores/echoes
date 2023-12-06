@@ -1,9 +1,14 @@
-import { DeepPartial, FindOptionsWhere, Repository } from 'typeorm';
+import {
+  DeepPartial,
+  FindManyOptions,
+  FindOneOptions,
+  Repository,
+} from 'typeorm';
 
 export abstract class BaseDAO<Entity> {
   protected constructor(protected _baseRepository: Repository<Entity>) {}
 
-  getOne(conditions: FindOptionsWhere<Entity>) {
+  getOne(conditions: FindOneOptions<Entity>) {
     return this._baseRepository.findOne(conditions);
   }
 
@@ -11,7 +16,7 @@ export abstract class BaseDAO<Entity> {
     return this._baseRepository.save(data);
   }
 
-  get(conditions: FindOptionsWhere<Entity>) {
+  get(conditions?: FindManyOptions<Entity>) {
     return this._baseRepository.find(conditions);
   }
 }

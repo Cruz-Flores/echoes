@@ -26,6 +26,6 @@ export class SongService {
   }
 
   getAll() {
-    return this.songDao.get({});
+    return this.songDao.get();
   }
 }

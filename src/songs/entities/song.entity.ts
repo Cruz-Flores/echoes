@@ -21,4 +21,12 @@ export class SongEntity {
     enum: Version,
   })
   version: Version;
+
+  @Column({
+    nullable: false,
+    type: 'timestamp',
+    name: 'created_at',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  createdAt: Date;
 }

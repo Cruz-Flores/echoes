@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Version } from '@echoes/core';
 
 import { FindOneParams } from '../common/daos/base.dao';
-import { SongDAO } from './song.dao';
+import { SongDAO } from './daos/song.dao';
 import { SongEntity } from './entities/song.entity';
 
 type CreateSongParams = {
@@ -28,7 +28,7 @@ export class SongService {
   }
 
   getAll() {
-    return this.songDao.get();
+    return this.songDao.getAll();
   }
 
   getOne(params: FindOneParams<SongEntity>) {

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { SongDAO } from './song.dao';
+import { SongDAO } from './daos/song.dao';
 import { SongEntity } from './entities/song.entity';
 import { SongsController } from './songs.controller';
 import { SongService } from './song.service';

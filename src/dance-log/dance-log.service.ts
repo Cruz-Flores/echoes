@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DanceLogDAO } from './daos/dance-log.dao';
-import { SongService } from 'src/songs/song.service';
+import { SongService } from 'src/song/song.service';
 
 type CreateDanceLogParams = {
   id: string;
@@ -17,15 +17,14 @@ export class DanceLogService {
   ) {}
 
   async create({ id, songId, kcal, session }: CreateDanceLogParams) {
-    const { id: songFindedId } = await this.songService.getOne({
-      where: { id: songId },
-    });
-
-    return this.danceLogDAO.save({
-      id,
-      song: { id: songFindedId },
-      kcal,
-      session,
-    });
+    // const { id: songFindedId } = await this.songService.getOne({
+    //   where: { id: songId },
+    // });
+    // return this.danceLogDAO.save({
+    //   id,
+    //   song: { id: songFindedId },
+    //   kcal,
+    //   session,
+    // });
   }
 }

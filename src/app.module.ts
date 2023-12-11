@@ -4,10 +4,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DanceLogModule } from './dance-log/dance-log.module';
 import { DatabaseModule } from './database/database.module';
-import { SongsModule } from './songs/songs.module';
+import { SongModule } from './song/song.module';
 
 @Module({
-  imports: [SongsModule, DatabaseModule, DanceLogModule],
+  imports: [DanceLogModule, DatabaseModule, SongModule],
   controllers: [AppController],
   providers: [AppService],
 })

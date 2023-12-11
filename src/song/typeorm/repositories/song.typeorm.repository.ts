@@ -1,18 +1,12 @@
-import { SongRepository } from 'src/song/interfaces/song.repository';
-import { Song } from 'src/song/song';
-import { Repository } from 'typeorm';
-import { SongEntity } from '../entities/song.entity';
+import { FilterBuilder, IFilterQuery } from 'typeorm-dynamic-filters';
 import { InjectRepository } from '@nestjs/typeorm';
+import { NotFoundException } from '@nestjs/common';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 
-export type GetAllSongsParams = {
-  filterBy?: string;
-  filterValue?: string;
-  filterType?: string;
-  page?: number;
-  per_page?: number;
-  orderBy?: string;
-  orderType?: string;
-};
+import { buildDynamicFilters } from '../../../common/helpers/typeorm/build-dynamic-filters.helper';
+import { Song } from '../../song';
+import { SongEntity } from '../entities/song.entity';
+import { SongRepository } from '../../interfaces/song.repository';
 
 export class SongTypeormRepository implements SongRepository {
   constructor(
@@ -20,12 +14,33 @@ export class SongTypeormRepository implements SongRepository {
     private readonly repository: Repository<SongEntity>,
   ) {}
 
-  findOne(specification: any): Promise<Song> {
-    throw new Error('Method not implemented.');
+  async findOne({ where }: any): Promise<Song> {
+    const row = await this.buildQueryBuilder({
+      where,
+    }).getOne();
+    if (!row) {
+      throw new NotFoundException('Song not found');
+    }
+
+    return this.build(row);
   }
 
-  findAll(specification: any): Promise<Song[]> {
-    throw new Error('Method not implemented.');
+  async findAll({
+    where,
+    limit,
+    page,
+    orderBy,
+    orderType,
+  }: any): Promise<Song[]> {
+    const raws = await this.buildQueryBuilder({
+      where,
+      limit,
+      page,
+      orderBy,
+      orderType,
+    }).getMany();
+
+    return raws.map((raw) => this.build(raw));
   }
 
   async save(song: Song): Promise<void> {
@@ -39,5 +54,39 @@ export class SongTypeormRepository implements SongRepository {
     await this.repository.save(songEntity);
 
     return void 0;
+  }
+
+  buildQueryBuilder({
+    where,
+    limit,
+    page,
+    orderBy,
+    orderType,
+  }: any): SelectQueryBuilder<SongEntity> {
+    const queryBuilder = new FilterBuilder(this.repository, 'song');
+    const filterObject = JSON.parse(where);
+    const { filterBy, filterType, filterValue } =
+      buildDynamicFilters(filterObject);
+    const conditions: IFilterQuery = {
+      filterBy,
+      filterValue,
+      filterType,
+      page,
+      per_page: limit,
+      orderBy,
+      orderType,
+    };
+
+    return queryBuilder.build(conditions);
+  }
+
+  build(songEntity: SongEntity): Song {
+    return Song.of({
+      id: songEntity.id,
+      level: songEntity.level,
+      perceivedLevel: songEntity.perceivedLevel,
+      version: songEntity.version,
+      name: songEntity.name,
+    });
   }
 }

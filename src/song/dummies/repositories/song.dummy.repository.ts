@@ -4,8 +4,16 @@ import { Song } from '../../song';
 import { SongRepository } from '../../interfaces/song.repository';
 
 export class SongDummyRepository implements SongRepository {
-  findOne(specification: any): Promise<Song> {
-    throw new Error('Method not implemented.');
+  async findOne(specification: any): Promise<Song> {
+    const song = Song.of({
+      id: '1',
+      level: 1,
+      perceivedLevel: 1,
+      version: Version.ExceedToZero,
+      name: 'Song 1',
+    });
+
+    return song;
   }
 
   async findAll(specification: any): Promise<Song[]> {

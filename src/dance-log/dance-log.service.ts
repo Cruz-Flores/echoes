@@ -28,7 +28,8 @@ export class DanceLogService {
       session,
     });
     danceLog.assignSong(song);
+    await this.danceLogRepository.save(danceLog);
 
-    return this.danceLogRepository.save(danceLog);
+    return danceLog;
   }
 }

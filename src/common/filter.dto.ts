@@ -1,31 +1,30 @@
+import { Transform } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 
-enum OrderType {
+export enum OrderType {
   ASC = 'ASC',
   DESC = 'DESC',
 }
 
-//podrian solicitarse los filtros que uno crea necesarios y parsearlos para la tecnologia que se este usando
-export class GetAllSongsDTO {
+export class FilterDTO {
   @IsOptional()
   @IsString()
-  filterBy?: string;
-
-  @IsOptional()
-  @IsString()
-  filterValue?: string;
-
-  @IsOptional()
-  @IsString()
-  filterType?: string;
+  where?: string;
 
   @IsOptional()
   @IsNumber()
+  @Transform(({ value }) => parseInt(value))
+  limit?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Transform(({ value }) => parseInt(value))
+  offset?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Transform(({ value }) => parseInt(value))
   page?: number;
-
-  @IsOptional()
-  @IsNumber()
-  per_page?: number;
 
   @IsOptional()
   @IsString()

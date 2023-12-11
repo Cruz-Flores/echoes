@@ -3,10 +3,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { DanceLogModule } from '../dance-log/dance-log.module';
 import { SongController } from './song.controller';
-import { SongDummyRepository } from './dummies/repositories/song.dummy.repository';
 import { SongEntity } from './typeorm/entities/song.entity';
 import { SongRepository } from './interfaces/song.repository';
 import { SongService } from './song.service';
+import { SongTypeormRepository } from './typeorm/repositories/song.typeorm.repository';
 
 @Module({
   imports: [
@@ -16,7 +16,7 @@ import { SongService } from './song.service';
   controllers: [SongController],
   providers: [
     SongService,
-    { provide: SongRepository, useClass: SongDummyRepository },
+    { provide: SongRepository, useClass: SongTypeormRepository },
   ],
   exports: [SongRepository],
 })

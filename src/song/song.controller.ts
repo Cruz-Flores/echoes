@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 
 import { CreateSongDTO } from './dtos/create-song.dto';
-import { GetAllSongsDTO } from './dtos/get-all-songs.dto';
+import { FilterDTO } from '../common/filter.dto';
 import { SongService } from './song.service';
 
 @Controller('songs')
@@ -20,7 +20,16 @@ export class SongController {
   }
 
   @Get()
-  getAll(@Query() q: GetAllSongsDTO) {
-    return this.songService.getAll(q);
+  getAll(
+    @Query() { where, limit, offset, page, orderBy, orderType }: FilterDTO,
+  ) {
+    return this.songService.getAll({
+      where,
+      limit,
+      offset,
+      page,
+      orderBy,
+      orderType,
+    });
   }
 }

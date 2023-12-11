@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 
 import { CreateSongDTO } from './dtos/create-song.dto';
+import { GetAllSongsDTO } from './dtos/get-all-songs.dto';
 import { SongService } from './song.service';
 
 @Controller('songs')
@@ -19,7 +20,7 @@ export class SongsController {
   }
 
   @Get()
-  getAll() {
-    return this.songService.getAll();
+  getAll(@Query() q: GetAllSongsDTO) {
+    return this.songService.getAll(q);
   }
 }

@@ -29,7 +29,11 @@ export class SongService {
     return song;
   }
 
-  getAll(q: any) {
+  getAll(q: any): Promise<Song[]> {
     return this.songRepository.findAll(q);
+  }
+
+  getOne(q: any): Promise<Song> {
+    return this.songRepository.findOne(q);
   }
 }

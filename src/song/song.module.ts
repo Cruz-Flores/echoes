@@ -18,6 +18,6 @@ import { SongService } from './song.service';
     SongService,
     { provide: SongRepository, useClass: SongDummyRepository },
   ],
-  exports: [SongService],
+  exports: [SongRepository],
 })
 export class SongModule {}

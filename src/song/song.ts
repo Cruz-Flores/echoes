@@ -1,4 +1,5 @@
 import { Version } from '@echoes/core';
+import { DanceLog } from '../dance-log/dance-log';
 
 export class Song {
   private id: string;
@@ -6,6 +7,7 @@ export class Song {
   private perceivedLevel: number;
   private version: Version;
   private name: string;
+  private kcalsAverage: number;
 
   constructor({
     id,
@@ -33,20 +35,27 @@ export class Song {
     perceivedLevel,
     version,
     name,
+    kcalsAverage = 0,
   }: {
     id: string;
     level: number;
     perceivedLevel: number;
     version: Version;
     name: string;
+    kcalsAverage?: number;
   }) {
-    return new Song({
+    const song = new this({
       id,
       level,
       perceivedLevel,
       version,
       name,
     });
+    if (typeof kcalsAverage === 'number') {
+      song.setKcalsAverage(kcalsAverage);
+    }
+
+    return song;
   }
 
   getId() {
@@ -67,6 +76,28 @@ export class Song {
 
   getName() {
     return this.name;
+  }
+
+  getKcalsAverage() {
+    return this.kcalsAverage;
+  }
+
+  calculateKcalsAverage(danceLogs: DanceLog[]) {
+    if (danceLogs.length === 0) {
+      return;
+    }
+    const kcalsAverage = danceLogs.reduce(
+      (acc, danceLog) => acc + danceLog.getKcal(),
+      0,
+    );
+
+    this.setKcalsAverage(
+      parseFloat((kcalsAverage / danceLogs.length).toFixed(2)),
+    );
+  }
+
+  private setKcalsAverage(kcalsAverage: number) {
+    this.kcalsAverage = kcalsAverage;
   }
 
   private setId(id: string) {

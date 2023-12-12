@@ -50,6 +50,7 @@ export class SongTypeormRepository implements SongRepository {
       perceivedLevel: song.getPerceivedLevel(),
       version: song.getVersion(),
       name: song.getName(),
+      kcalsAverage: song.getKcalsAverage(),
     });
     await this.repository.save(songEntity);
 
@@ -57,7 +58,7 @@ export class SongTypeormRepository implements SongRepository {
   }
 
   buildQueryBuilder({
-    where,
+    where = '{}',
     limit,
     page,
     orderBy,
@@ -80,13 +81,21 @@ export class SongTypeormRepository implements SongRepository {
     return queryBuilder.build(conditions);
   }
 
-  build(songEntity: SongEntity): Song {
+  build({
+    id,
+    kcalsAverage,
+    level,
+    version,
+    perceivedLevel,
+    name,
+  }: SongEntity): Song {
     return Song.of({
-      id: songEntity.id,
-      level: songEntity.level,
-      perceivedLevel: songEntity.perceivedLevel,
-      version: songEntity.version,
-      name: songEntity.name,
+      id,
+      kcalsAverage,
+      level,
+      version,
+      perceivedLevel,
+      name,
     });
   }
 }

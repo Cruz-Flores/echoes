@@ -76,15 +76,17 @@ export class DanceLogTypeormRepository implements DanceLogRepository {
       orderBy,
       orderType,
     };
+    const qb = queryBuilder.build(conditions);
+    qb.leftJoinAndSelect('danceLog.song', 'song');
 
-    return queryBuilder.build(conditions);
+    return qb;
   }
 
   build({
     id,
     kcal,
     session,
-    song: { id: songId, level, name, version, perceivedLevel },
+    song: { id: songId, level, name, version, perceivedLevel, kcalsAverage },
   }: DanceLogEntity): DanceLog {
     const song = Song.of({
       id: songId,
@@ -92,6 +94,7 @@ export class DanceLogTypeormRepository implements DanceLogRepository {
       name,
       version,
       perceivedLevel,
+      kcalsAverage,
     });
     const danceLog = DanceLog.of({
       id,

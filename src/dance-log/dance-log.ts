@@ -20,7 +20,15 @@ export class DanceLog {
     this.setSession(session);
   }
 
-  static of({ id, kcal, session }) {
+  static of({
+    id,
+    kcal,
+    session,
+  }: {
+    id: string;
+    kcal: number;
+    session: number;
+  }): DanceLog {
     return new this({ id, kcal, session });
   }
 

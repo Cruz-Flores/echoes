@@ -1,7 +1,23 @@
 import { Version } from '@echoes/core';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  ValueTransformer,
+} from 'typeorm';
 
-import { DanceLogEntity } from '../../dance-log/entities/dance-log.entity';
+import { DanceLogEntity } from '../../../dance-log/typeorm/entities/dance-log.entity';
+
+//TODO: Move this to a common place
+class DecimalTransformer implements ValueTransformer {
+  to(value: number): number {
+    return value;
+  }
+  from(value: string): number {
+    return parseFloat(value);
+  }
+}
 
 @Entity('songs')
 export class SongEntity {
@@ -23,6 +39,7 @@ export class SongEntity {
     precision: 5,
     scale: 2,
     name: 'perceived_level',
+    transformer: new DecimalTransformer(),
   })
   perceivedLevel: number;
 

@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { DanceLogDAO } from './daos/dance-log.dao';
-import { SongService } from 'src/songs/song.service';
+
+import { DanceLog } from './dance-log';
+import { DanceLogRepository } from './interfaces/dance-log.repository';
+import { SongRepository } from '../song/interfaces/song.repository';
 
 type CreateDanceLogParams = {
   id: string;
@@ -12,20 +14,23 @@ type CreateDanceLogParams = {
 @Injectable()
 export class DanceLogService {
   constructor(
-    private readonly danceLogDAO: DanceLogDAO,
-    private readonly songService: SongService,
+    private readonly danceLogRepository: DanceLogRepository,
+    private readonly songRepository: SongRepository,
   ) {}
 
   async create({ id, songId, kcal, session }: CreateDanceLogParams) {
-    const { id: songFindedId } = await this.songService.getOne({
-      where: { id: songId },
+    // TODO: pasar las condiciones como string esta feo
+    const song = await this.songRepository.findOne({
+      where: JSON.stringify({ id: { eq: songId } }),
     });
-
-    return this.danceLogDAO.save({
+    const danceLog = DanceLog.of({
       id,
-      song: { id: songFindedId },
       kcal,
       session,
     });
+    danceLog.assignSong(song);
+    await this.danceLogRepository.save(danceLog);
+
+    return danceLog;
   }
 }

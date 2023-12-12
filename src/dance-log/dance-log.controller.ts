@@ -3,7 +3,7 @@ import { Body, Controller, Post } from '@nestjs/common';
 import { CreateDanceLogDTO } from './dtos/create-dance-log.dto';
 import { DanceLogService } from './dance-log.service';
 
-@Controller('dance-log')
+@Controller('dance-logs')
 export class DanceLogController {
   constructor(private readonly createDanceLogService: DanceLogService) {}
 

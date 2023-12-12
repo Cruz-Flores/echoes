@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Version } from '@echoes/core';
 
+import { OrderType } from '../common/filter.dto';
 import { Song } from './song';
 import { SongRepository } from './interfaces/song.repository';
 
@@ -29,8 +30,29 @@ export class SongService {
     return song;
   }
 
-  getAll(q: any): Promise<Song[]> {
-    return this.songRepository.findAll(q);
+  getAll({
+    limit,
+    offset,
+    orderBy,
+    orderType,
+    page,
+    where,
+  }: {
+    where: string;
+    limit: number;
+    offset: number;
+    page: number;
+    orderBy: string;
+    orderType: OrderType;
+  }): Promise<Song[]> {
+    return this.songRepository.findAll({
+      where,
+      limit,
+      offset,
+      page,
+      orderBy,
+      orderType,
+    });
   }
 
   getOne(q: any): Promise<Song> {

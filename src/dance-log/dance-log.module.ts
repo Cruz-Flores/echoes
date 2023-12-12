@@ -2,10 +2,10 @@ import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { DanceLogController } from './dance-log.controller';
-import { DanceLogDummyRepository } from './dummies/dance-log.dummy.repository';
-import { DanceLogEntity } from './entities/dance-log.entity';
+import { DanceLogEntity } from './typeorm/entities/dance-log.entity';
 import { DanceLogRepository } from './interfaces/dance-log.repository';
 import { DanceLogService } from './dance-log.service';
+import { DanceLogTypeormRepository } from './typeorm/repositories/dance-log.typeorm.repository';
 import { SongModule } from '../song/song.module';
 
 @Module({
@@ -15,7 +15,7 @@ import { SongModule } from '../song/song.module';
   ],
   providers: [
     DanceLogService,
-    { provide: DanceLogRepository, useClass: DanceLogDummyRepository },
+    { provide: DanceLogRepository, useClass: DanceLogTypeormRepository },
   ],
   controllers: [DanceLogController, DanceLogController],
   exports: [DanceLogService],

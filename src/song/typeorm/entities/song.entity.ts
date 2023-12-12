@@ -10,7 +10,7 @@ import {
 import { DanceLogEntity } from '../../../dance-log/typeorm/entities/dance-log.entity';
 
 //TODO: Move this to a common place
-class DecimalTransformer implements ValueTransformer {
+export class DecimalTransformer implements ValueTransformer {
   to(value: number): number {
     return value;
   }

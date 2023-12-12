@@ -50,6 +50,7 @@ export class SongTypeormRepository implements SongRepository {
       perceivedLevel: song.getPerceivedLevel(),
       version: song.getVersion(),
       name: song.getName(),
+      kcalsAverage: song.getKcalsAverage(),
     });
     await this.repository.save(songEntity);
 

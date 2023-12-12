@@ -35,20 +35,27 @@ export class Song {
     perceivedLevel,
     version,
     name,
+    kcalsAverage,
   }: {
     id: string;
     level: number;
     perceivedLevel: number;
     version: Version;
     name: string;
+    kcalsAverage?: number;
   }) {
-    return new Song({
+    const song = new this({
       id,
       level,
       perceivedLevel,
       version,
       name,
     });
+    if (kcalsAverage) {
+      song.setKcalsAverage(kcalsAverage);
+    }
+
+    return song;
   }
 
   getId() {

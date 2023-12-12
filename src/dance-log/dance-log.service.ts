@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { DanceLog } from './dance-log';
 import { DanceLogRepository } from './interfaces/dance-log.repository';
+import { Song } from '../song/song';
 import { SongRepository } from '../song/interfaces/song.repository';
 
 type CreateDanceLogParams = {
@@ -30,7 +31,21 @@ export class DanceLogService {
     });
     danceLog.assignSong(song);
     await this.danceLogRepository.save(danceLog);
+    // TODO: mover esto a un evento
+    await this.recalculateSongKcalsAverage(song);
 
     return danceLog;
+  }
+
+  async recalculateSongKcalsAverage(song: Song): Promise<void> {
+    const lastDanceLogs = await this.danceLogRepository.findAll({
+      where: JSON.stringify({ songId: { eq: song.getId() } }),
+      limit: 7,
+      orderBy: 'createdAt',
+      orderType: 'DESC',
+    });
+    song.calculateKcalsAverage(lastDanceLogs);
+
+    return this.songRepository.save(song);
   }
 }

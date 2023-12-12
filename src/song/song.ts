@@ -35,7 +35,7 @@ export class Song {
     perceivedLevel,
     version,
     name,
-    kcalsAverage,
+    kcalsAverage = 0,
   }: {
     id: string;
     level: number;
@@ -51,7 +51,7 @@ export class Song {
       version,
       name,
     });
-    if (kcalsAverage) {
+    if (typeof kcalsAverage === 'number') {
       song.setKcalsAverage(kcalsAverage);
     }
 
@@ -90,7 +90,10 @@ export class Song {
       (acc, danceLog) => acc + danceLog.getKcal(),
       0,
     );
-    this.setKcalsAverage(kcalsAverage / danceLogs.length);
+
+    this.setKcalsAverage(
+      parseFloat((kcalsAverage / danceLogs.length).toFixed(2)),
+    );
   }
 
   private setKcalsAverage(kcalsAverage: number) {

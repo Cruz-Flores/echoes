@@ -54,7 +54,6 @@ export class SongEntity {
 
   @Column({
     nullable: false,
-    default: 0,
     type: 'decimal',
     precision: 5,
     scale: 2,

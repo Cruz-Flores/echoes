@@ -32,6 +32,7 @@ export class DanceLogService {
     danceLog.assignSong(song);
     await this.danceLogRepository.save(danceLog);
     // TODO: mover esto a un evento
+    // TODO: durante el flujo al tratarse de un solo objeto se modifica, atencion a esto
     await this.recalculateSongKcalsAverage(song);
 
     return danceLog;

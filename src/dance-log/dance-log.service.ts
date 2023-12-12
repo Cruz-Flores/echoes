@@ -19,8 +19,9 @@ export class DanceLogService {
   ) {}
 
   async create({ id, songId, kcal, session }: CreateDanceLogParams) {
+    // TODO: pasar las condiciones como string esta feo
     const song = await this.songRepository.findOne({
-      where: { id: songId },
+      where: JSON.stringify({ id: { eq: songId } }),
     });
     const danceLog = DanceLog.of({
       id,

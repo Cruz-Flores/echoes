@@ -7,7 +7,7 @@ import {
   ValueTransformer,
 } from 'typeorm';
 
-import { DanceLogEntity } from '../../../dance-log/entities/dance-log.entity';
+import { DanceLogEntity } from '../../../dance-log/typeorm/entities/dance-log.entity';
 
 //TODO: Move this to a common place
 class DecimalTransformer implements ValueTransformer {

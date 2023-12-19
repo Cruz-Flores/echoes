@@ -44,6 +44,14 @@ export class SongEntity {
 
   @Column({
     nullable: false,
+    type: 'int',
+    transformer: new IntTransformer(),
+    name: 'body_impact',
+  })
+  bodyImpact: number;
+
+  @Column({
+    nullable: false,
     type: 'decimal',
     precision: 5,
     scale: 2,

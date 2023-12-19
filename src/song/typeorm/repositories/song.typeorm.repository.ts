@@ -69,7 +69,7 @@ export class SongTypeormRepository implements SongRepository {
     orderBy,
     orderType,
   }: any): Promise<SelectQueryBuilder<SongEntity>> {
-    await this.getSongsIds();
+    const songIds = await this.getSongsIds();
     const queryBuilder = new FilterBuilder(this.repository, 'song');
     const filterObject = JSON.parse(where);
     const { filterBy, filterType, filterValue } =
@@ -84,28 +84,15 @@ export class SongTypeormRepository implements SongRepository {
       orderType,
     };
 
-    return queryBuilder.build(conditions);
+    return queryBuilder.build(conditions).whereInIds(songIds);
   }
 
   async getSongsIds(): Promise<string[]> {
-    //conteo de las canciones
-    //dividir entre 20
-    //buscar canciones qu no tengan registros en los ultimos n dias
-    //pasar los ids
     const count = await this.repository.count();
-    //dividimpos el conteo entre 20 y redondeamos hacia aabajo
     const days = Math.ceil(count / 20);
-    //obtenemos la fecha de hace n dias
     const date = new Date();
     date.setDate(date.getDate() - days);
-    //obtenemos los ids de las canciones que no tienen registros en los ultimos n dias
-    const raws = await this.repository
-      .createQueryBuilder('song')
-      .leftJoinAndSelect('song.danceLogs', 'danceLogs')
-      .where('danceLogs.createdAt < :date', { date })
-      .getMany();
-
-    const test = await this.repository
+    const songs = await this.repository
       .createQueryBuilder('song')
       .leftJoin(
         (subQuery) => {
@@ -122,7 +109,7 @@ export class SongTypeormRepository implements SongRepository {
         { sevenDaysAgo: date },
       )
       .getMany();
-    return [];
+    return songs.map((song) => song.id);
   }
 
   build({

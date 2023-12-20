@@ -1,7 +1,13 @@
 import { FilterBuilder, IFilterQuery } from 'typeorm-dynamic-filters';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import {
+  Between,
+  IsNull,
+  LessThan,
+  Repository,
+  SelectQueryBuilder,
+} from 'typeorm';
 
 import { buildDynamicFilters } from '../../../common/helpers/typeorm/build-dynamic-filters.helper';
 import { Song } from '../../song';
@@ -89,26 +95,24 @@ export class SongTypeormRepository implements SongRepository {
 
   async getSongsIds(): Promise<string[]> {
     const count = await this.repository.count();
-    const days = Math.ceil(count / 20);
-    const date = new Date();
-    date.setDate(date.getDate() - days);
-    const songs = await this.repository
+    const { maxSession } = await this.repository
       .createQueryBuilder('song')
-      .leftJoin(
-        (subQuery) => {
-          return subQuery
-            .select('danceLog.songId, MAX(danceLog.createdAt) as lastDanceLog')
-            .from(DanceLogEntity, 'danceLog')
-            .groupBy('"danceLog"."song_id"');
+      .select('MAX(danceLogs.session)', 'maxSession')
+      .leftJoin('song.danceLogs', 'danceLogs')
+      .getRawOne();
+    const sessions = Math.ceil(count / 20);
+    const sessionToFind = maxSession - sessions;
+    const songs = await this.repository.find({
+      where: [
+        {
+          danceLogs: { session: sessionToFind < 0 ? 0 : sessionToFind },
         },
-        'lastDanceLog',
-        '"lastDanceLog"."song_id" = song.id',
-      )
-      .where(
-        '"lastDanceLog".lastDanceLog IS NULL OR "lastDanceLog".lastDanceLog < :sevenDaysAgo',
-        { sevenDaysAgo: date },
-      )
-      .getMany();
+        {
+          danceLogs: { session: IsNull() },
+        },
+      ],
+    });
+
     return songs.map((song) => song.id);
   }
 

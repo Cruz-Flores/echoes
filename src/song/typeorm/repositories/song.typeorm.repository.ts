@@ -75,9 +75,8 @@ export class SongTypeormRepository implements SongRepository {
     orderBy,
     orderType,
   }: any): Promise<SelectQueryBuilder<SongEntity>> {
-    const songIds = await this.getSongsIds();
     const queryBuilder = new FilterBuilder(this.repository, 'song');
-    const filterObject = JSON.parse(where);
+    const { danceLogView, ...filterObject } = JSON.parse(where);
     const { filterBy, filterType, filterValue } =
       buildDynamicFilters(filterObject);
     const conditions: IFilterQuery = {
@@ -89,8 +88,13 @@ export class SongTypeormRepository implements SongRepository {
       orderBy,
       orderType,
     };
+    const qb = queryBuilder.build(conditions);
+    if (danceLogView?.eq === 'true') {
+      const songIds = await this.getSongsIds();
+      qb.andWhere('song.id IN (:...songIds)', { songIds });
+    }
 
-    return queryBuilder.build(conditions).whereInIds(songIds);
+    return qb;
   }
 
   async getSongsIds(): Promise<string[]> {

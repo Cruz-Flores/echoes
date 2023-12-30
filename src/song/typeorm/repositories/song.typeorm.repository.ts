@@ -1,19 +1,12 @@
 import { FilterBuilder, IFilterQuery } from 'typeorm-dynamic-filters';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
-import {
-  Between,
-  IsNull,
-  LessThan,
-  Repository,
-  SelectQueryBuilder,
-} from 'typeorm';
+import { IsNull, Repository, SelectQueryBuilder } from 'typeorm';
 
 import { buildDynamicFilters } from '../../../common/helpers/typeorm/build-dynamic-filters.helper';
 import { Song } from '../../song';
 import { SongEntity } from '../entities/song.entity';
 import { SongRepository } from '../../interfaces/song.repository';
-import { DanceLogEntity } from 'src/dance-log/typeorm/entities/dance-log.entity';
 
 export class SongTypeormRepository implements SongRepository {
   constructor(
@@ -62,6 +55,7 @@ export class SongTypeormRepository implements SongRepository {
       version: song.getVersion(),
       name: song.getName(),
       kcalsAverage: song.getKcalsAverage(),
+      bodyImpact: song.getBodyImpact(),
     });
     await this.repository.save(songEntity);
 
@@ -127,6 +121,7 @@ export class SongTypeormRepository implements SongRepository {
     version,
     perceivedLevel,
     name,
+    bodyImpact,
   }: SongEntity): Song {
     return Song.of({
       id,
@@ -135,6 +130,7 @@ export class SongTypeormRepository implements SongRepository {
       version,
       perceivedLevel,
       name,
+      bodyImpact,
     });
   }
 }

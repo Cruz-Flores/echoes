@@ -9,13 +9,17 @@ export class SongController {
   constructor(private readonly songService: SongService) {}
 
   @Post()
-  create(@Body() { id, level, perceivedLevel, version, name }: CreateSongDTO) {
+  create(
+    @Body()
+    { id, level, perceivedLevel, version, name, bodyImpact }: CreateSongDTO,
+  ) {
     return this.songService.create({
       id,
       level,
       perceivedLevel,
       version,
       name,
+      bodyImpact,
     });
   }
 

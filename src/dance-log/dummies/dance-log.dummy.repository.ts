@@ -17,6 +17,7 @@ export class DanceLogDummyRepository implements DanceLogRepository {
       level: 1,
       perceivedLevel: 1,
       version: Version.ExceedToZero,
+      bodyImpact: 1,
     });
     danceLog.assignSong(song);
 
@@ -32,6 +33,7 @@ export class DanceLogDummyRepository implements DanceLogRepository {
       level: 1,
       perceivedLevel: 1,
       version: Version.ExceedToZero,
+      bodyImpact: 1,
     });
     const danceLogs = [
       DanceLog.of({

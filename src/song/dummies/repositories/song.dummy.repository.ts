@@ -11,6 +11,7 @@ export class SongDummyRepository implements SongRepository {
       perceivedLevel: 1,
       version: Version.ExceedToZero,
       name: 'Song 1',
+      bodyImpact: 1,
     });
 
     return song;
@@ -24,6 +25,7 @@ export class SongDummyRepository implements SongRepository {
         perceivedLevel: 1,
         version: Version.ExceedToZero,
         name: 'Song 1',
+        bodyImpact: 1,
       }),
       Song.of({
         id: '2',
@@ -31,6 +33,7 @@ export class SongDummyRepository implements SongRepository {
         perceivedLevel: 2,
         version: Version.ExceedToZero,
         name: 'Song 2',
+        bodyImpact: 1,
       }),
       Song.of({
         id: '3',
@@ -38,6 +41,7 @@ export class SongDummyRepository implements SongRepository {
         perceivedLevel: 3,
         version: Version.ExceedToZero,
         name: 'Song 3',
+        bodyImpact: 1,
       }),
       Song.of({
         id: '4',
@@ -45,6 +49,7 @@ export class SongDummyRepository implements SongRepository {
         perceivedLevel: 4,
         version: Version.ExceedToZero,
         name: 'Song 4',
+        bodyImpact: 1,
       }),
       Song.of({
         id: '5',
@@ -52,6 +57,7 @@ export class SongDummyRepository implements SongRepository {
         perceivedLevel: 5,
         version: Version.ExceedToZero,
         name: 'Song 5',
+        bodyImpact: 1,
       }),
     ];
   }

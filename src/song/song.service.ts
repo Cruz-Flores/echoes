@@ -11,21 +11,30 @@ type CreateSongParams = {
   perceivedLevel: number;
   version: Version;
   name: string;
+  bodyImpact: number;
 };
 
 @Injectable()
 export class SongService {
   constructor(private readonly songRepository: SongRepository) {}
 
-  create({ id, level, perceivedLevel, version, name }: CreateSongParams) {
+  async create({
+    id,
+    level,
+    perceivedLevel,
+    version,
+    name,
+    bodyImpact,
+  }: CreateSongParams) {
     const song = Song.of({
       id,
       level,
       perceivedLevel,
       version,
       name,
+      bodyImpact,
     });
-    this.songRepository.save(song);
+    await this.songRepository.save(song);
 
     return song;
   }

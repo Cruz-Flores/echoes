@@ -20,6 +20,10 @@ export class CreateSongDTO {
   @IsNotEmpty()
   readonly perceivedLevel: number;
 
+  @IsNumber()
+  @IsNotEmpty()
+  readonly bodyImpact: number;
+
   @IsEnum(Version)
   @IsNotEmpty()
   readonly version: Version;

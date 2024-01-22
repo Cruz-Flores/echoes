@@ -1,13 +1,12 @@
 import { FilterBuilder, IFilterQuery } from 'typeorm-dynamic-filters';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { IsNull, Repository, SelectQueryBuilder } from 'typeorm';
 
 import { buildDynamicFilters } from '../../../common/helpers/typeorm/build-dynamic-filters.helper';
 import { Song } from '../../song';
 import { SongEntity } from '../entities/song.entity';
 import { SongRepository } from '../../interfaces/song.repository';
-import { DanceLogEntity } from 'src/dance-log/typeorm/entities/dance-log.entity';
 
 export class SongTypeormRepository implements SongRepository {
   constructor(
@@ -56,6 +55,7 @@ export class SongTypeormRepository implements SongRepository {
       version: song.getVersion(),
       name: song.getName(),
       kcalsAverage: song.getKcalsAverage(),
+      bodyImpact: song.getBodyImpact(),
     });
     await this.repository.save(songEntity);
 
@@ -69,9 +69,8 @@ export class SongTypeormRepository implements SongRepository {
     orderBy,
     orderType,
   }: any): Promise<SelectQueryBuilder<SongEntity>> {
-    const songIds = await this.getSongsIds();
     const queryBuilder = new FilterBuilder(this.repository, 'song');
-    const filterObject = JSON.parse(where);
+    const { danceLogView, ...filterObject } = JSON.parse(where);
     const { filterBy, filterType, filterValue } =
       buildDynamicFilters(filterObject);
     const conditions: IFilterQuery = {
@@ -83,32 +82,35 @@ export class SongTypeormRepository implements SongRepository {
       orderBy,
       orderType,
     };
+    const qb = queryBuilder.build(conditions);
+    if (danceLogView?.eq === 'true') {
+      const songIds = await this.getSongsIds();
+      qb.andWhere('song.id IN (:...songIds)', { songIds });
+    }
 
-    return queryBuilder.build(conditions).whereInIds(songIds);
+    return qb;
   }
 
   async getSongsIds(): Promise<string[]> {
     const count = await this.repository.count();
-    const days = Math.ceil(count / 20);
-    const date = new Date();
-    date.setDate(date.getDate() - days);
-    const songs = await this.repository
+    const { maxSession } = await this.repository
       .createQueryBuilder('song')
-      .leftJoin(
-        (subQuery) => {
-          return subQuery
-            .select('danceLog.songId, MAX(danceLog.createdAt) as lastDanceLog')
-            .from(DanceLogEntity, 'danceLog')
-            .groupBy('"danceLog"."song_id"');
+      .select('MAX(danceLogs.session)', 'maxSession')
+      .leftJoin('song.danceLogs', 'danceLogs')
+      .getRawOne();
+    const sessions = Math.ceil(count / 20);
+    const sessionToFind = maxSession - sessions;
+    const songs = await this.repository.find({
+      where: [
+        {
+          danceLogs: { session: sessionToFind < 0 ? 0 : sessionToFind },
         },
-        'lastDanceLog',
-        '"lastDanceLog"."song_id" = song.id',
-      )
-      .where(
-        '"lastDanceLog".lastDanceLog IS NULL OR "lastDanceLog".lastDanceLog < :sevenDaysAgo',
-        { sevenDaysAgo: date },
-      )
-      .getMany();
+        {
+          danceLogs: { session: IsNull() },
+        },
+      ],
+    });
+
     return songs.map((song) => song.id);
   }
 
@@ -119,6 +121,7 @@ export class SongTypeormRepository implements SongRepository {
     version,
     perceivedLevel,
     name,
+    bodyImpact,
   }: SongEntity): Song {
     return Song.of({
       id,
@@ -127,6 +130,7 @@ export class SongTypeormRepository implements SongRepository {
       version,
       perceivedLevel,
       name,
+      bodyImpact,
     });
   }
 }

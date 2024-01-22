@@ -86,7 +86,15 @@ export class DanceLogTypeormRepository implements DanceLogRepository {
     id,
     kcal,
     session,
-    song: { id: songId, level, name, version, perceivedLevel, kcalsAverage },
+    song: {
+      id: songId,
+      level,
+      name,
+      version,
+      perceivedLevel,
+      kcalsAverage,
+      bodyImpact,
+    },
   }: DanceLogEntity): DanceLog {
     const song = Song.of({
       id: songId,
@@ -95,6 +103,7 @@ export class DanceLogTypeormRepository implements DanceLogRepository {
       version,
       perceivedLevel,
       kcalsAverage,
+      bodyImpact,
     });
     const danceLog = DanceLog.of({
       id,

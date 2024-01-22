@@ -8,6 +8,7 @@ export class Song {
   private version: Version;
   private name: string;
   private kcalsAverage: number;
+  private bodyImpact: number;
 
   constructor({
     id,
@@ -15,18 +16,21 @@ export class Song {
     name,
     perceivedLevel,
     version,
+    bodyImpact,
   }: {
     id: string;
     level: number;
     perceivedLevel: number;
     version: Version;
     name: string;
+    bodyImpact: number;
   }) {
     this.setId(id);
     this.setLevel(level);
     this.setPerceivedLevel(perceivedLevel);
     this.setVersion(version);
     this.setName(name);
+    this.setBodyImpact(bodyImpact);
   }
 
   static of({
@@ -36,6 +40,7 @@ export class Song {
     version,
     name,
     kcalsAverage = 0,
+    bodyImpact,
   }: {
     id: string;
     level: number;
@@ -43,19 +48,25 @@ export class Song {
     version: Version;
     name: string;
     kcalsAverage?: number;
-  }) {
+    bodyImpact: number;
+  }): Song {
     const song = new this({
       id,
       level,
       perceivedLevel,
       version,
       name,
+      bodyImpact,
     });
     if (typeof kcalsAverage === 'number') {
       song.setKcalsAverage(kcalsAverage);
     }
 
     return song;
+  }
+
+  getBodyImpact() {
+    return this.bodyImpact;
   }
 
   getId() {
@@ -118,5 +129,9 @@ export class Song {
 
   private setName(name: string) {
     this.name = name;
+  }
+
+  private setBodyImpact(bodyImpact: number) {
+    this.bodyImpact = bodyImpact;
   }
 }

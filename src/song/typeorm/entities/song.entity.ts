@@ -33,8 +33,9 @@ export class SongEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  //una cancion puede no tener dance logs
   @OneToMany(() => DanceLogEntity, (danceLog) => danceLog.song)
-  danceLogs: DanceLogEntity[];
+  danceLogs?: DanceLogEntity[];
 
   @Column({ nullable: false, type: 'varchar' })
   name: string;
@@ -83,5 +84,5 @@ export class SongEntity {
     name: 'created_at',
     default: () => 'CURRENT_TIMESTAMP',
   })
-  createdAt: Date;
+  createdAt?: Date;
 }

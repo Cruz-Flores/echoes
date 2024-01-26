@@ -65,6 +65,27 @@ export class Song {
     return song;
   }
 
+  // TODO: Darle sentido de negocio a este método
+  update({
+    level,
+    perceivedLevel,
+    version,
+    name,
+    bodyImpact,
+  }: {
+    level: number;
+    perceivedLevel: number;
+    version: Version;
+    name: string;
+    bodyImpact: number;
+  }) {
+    this.setLevel(level);
+    this.setPerceivedLevel(perceivedLevel);
+    this.setVersion(version);
+    this.setName(name);
+    this.setBodyImpact(bodyImpact);
+  }
+
   getBodyImpact() {
     return this.bodyImpact;
   }

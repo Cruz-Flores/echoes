@@ -39,6 +39,30 @@ export class SongService {
     return song;
   }
 
+  // TODO: Crear mapper de respuesta en creacion y actualizacion
+  async update({
+    id,
+    level,
+    perceivedLevel,
+    version,
+    name,
+    bodyImpact,
+  }: CreateSongParams) {
+    const song = await this.songRepository.findOne({
+      where: JSON.stringify({ id: { eq: id } }),
+    });
+    song.update({
+      level,
+      perceivedLevel,
+      version,
+      name,
+      bodyImpact,
+    });
+    await this.songRepository.save(song);
+
+    return song;
+  }
+
   getAll({
     limit,
     offset,

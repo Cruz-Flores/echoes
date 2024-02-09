@@ -1,9 +1,10 @@
+import { Between, IsNull, Repository, SelectQueryBuilder } from 'typeorm';
 import { FilterBuilder, IFilterQuery } from 'typeorm-dynamic-filters';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
-import { IsNull, Repository, SelectQueryBuilder } from 'typeorm';
 
 import { buildDynamicFilters } from '../../../common/helpers/typeorm/build-dynamic-filters.helper';
+import { DanceLogEntity } from '../../../dance-log/typeorm/entities/dance-log.entity';
 import { Song } from '../../song';
 import { SongEntity } from '../entities/song.entity';
 import { SongRepository } from '../../interfaces/song.repository';
@@ -92,18 +93,40 @@ export class SongTypeormRepository implements SongRepository {
   }
 
   async getSongsIds(): Promise<string[]> {
-    const count = await this.repository.count();
-    const { maxSession } = await this.repository
-      .createQueryBuilder('song')
-      .select('MAX(danceLogs.session)', 'maxSession')
-      .leftJoin('song.danceLogs', 'danceLogs')
-      .getRawOne();
-    const sessions = Math.ceil(count / 20);
-    const sessionToFind = maxSession - sessions;
+    const songsCount = await this.repository.count();
+    const lastSession =
+      (
+        await this.repository
+          .createQueryBuilder('song')
+          .select('MAX(danceLogs.session)', 'lastSession')
+          .leftJoin('song.danceLogs', 'danceLogs')
+          .getRawOne()
+      ).lastSession ?? 0;
+    const songsPerSessionAvg = (
+      await this.repository
+        .createQueryBuilder('dance_log')
+        .select('AVG(num_canciones)', 'songsPerSessionAvg')
+        .from((subQuery) => {
+          return subQuery
+            .select('session, COUNT(*)', 'num_canciones')
+            .from(DanceLogEntity, 'dance_log')
+            .groupBy('session');
+        }, 'conteo_sesiones')
+        .getRawOne()
+    ).songsPerSessionAvg;
+    const backwardSessions = songsPerSessionAvg
+      ? Math.ceil(songsCount / Math.ceil(Number(songsPerSessionAvg)))
+      : 0;
+    const targetSession = lastSession - backwardSessions;
     const songs = await this.repository.find({
       where: [
         {
-          danceLogs: { session: sessionToFind < 0 ? 0 : sessionToFind },
+          danceLogs: {
+            session: Between(
+              targetSession - 2 > 0 ? targetSession - 2 : 0,
+              targetSession,
+            ),
+          },
         },
         {
           danceLogs: { session: IsNull() },

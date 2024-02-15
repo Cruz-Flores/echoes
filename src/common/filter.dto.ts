@@ -13,17 +13,17 @@ export class FilterDTO {
 
   @IsOptional()
   @IsNumber()
-  @Transform(({ value }) => parseInt(value))
+  @Transform(({ value }) => Number(value))
   limit?: number;
 
   @IsOptional()
   @IsNumber()
-  @Transform(({ value }) => parseInt(value))
+  @Transform(({ value }) => Number(value))
   offset?: number;
 
   @IsOptional()
   @IsNumber()
-  @Transform(({ value }) => parseInt(value))
+  @Transform(({ value }) => Number(value))
   page?: number;
 
   @IsOptional()

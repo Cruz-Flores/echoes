@@ -86,7 +86,7 @@ export class SongTypeormRepository implements SongRepository {
     const qb = queryBuilder.build(conditions);
     if (danceLogView?.eq === 'true') {
       const songIds = await this.getSongsIds();
-      qb.andWhere('song.id IN (:...songIds)', { songIds });
+      qb.andWhere('song.id NOT IN (:...songIds)', { songIds });
     }
 
     return qb;
@@ -117,14 +117,15 @@ export class SongTypeormRepository implements SongRepository {
     const backwardSessions = songsPerSessionAvg
       ? Math.ceil(songsCount / Math.ceil(Number(songsPerSessionAvg)))
       : 0;
-    const targetSession = lastSession - backwardSessions;
     const songs = await this.repository.find({
       where: [
         {
           danceLogs: {
             session: Between(
-              targetSession - 2 > 0 ? targetSession - 2 : 0,
-              targetSession,
+              lastSession - backwardSessions > 0
+                ? lastSession - backwardSessions
+                : 0,
+              lastSession,
             ),
           },
         },

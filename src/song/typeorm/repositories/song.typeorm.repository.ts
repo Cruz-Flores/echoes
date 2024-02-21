@@ -86,7 +86,9 @@ export class SongTypeormRepository implements SongRepository {
     const qb = queryBuilder.build(conditions);
     if (danceLogView?.eq === 'true') {
       const songIds = await this.getSongsIds();
-      qb.andWhere('song.id NOT IN (:...songIds)', { songIds });
+      if (songIds.length > 0) {
+        qb.andWhere('song.id NOT IN (:...songIds)', { songIds });
+      }
     }
 
     return qb;
@@ -94,14 +96,11 @@ export class SongTypeormRepository implements SongRepository {
 
   async getSongsIds(): Promise<string[]> {
     const songsCount = await this.repository.count();
-    const lastSession =
-      (
-        await this.repository
-          .createQueryBuilder('song')
-          .select('MAX(danceLogs.session)', 'lastSession')
-          .leftJoin('song.danceLogs', 'danceLogs')
-          .getRawOne()
-      ).lastSession ?? 0;
+    const { lastSession } = await this.repository
+      .createQueryBuilder('song')
+      .select('MAX(danceLogs.session)', 'lastSession')
+      .leftJoin('song.danceLogs', 'danceLogs')
+      .getRawOne<{ lastSession: number }>();
     const songsPerSessionAvg = (
       await this.repository
         .createQueryBuilder('dance_log')
@@ -114,9 +113,16 @@ export class SongTypeormRepository implements SongRepository {
         }, 'conteo_sesiones')
         .getRawOne()
     ).songsPerSessionAvg;
-    const backwardSessions = songsPerSessionAvg
-      ? Math.ceil(songsCount / Math.ceil(Number(songsPerSessionAvg)))
-      : 0;
+    /**
+     * Si el promedio de canciones por sesión es nulo o 0 o la ultima sesion es
+     * nula o 0, no se ha bailado, por lo que no hay canciones que excluir
+     */
+    if (!songsPerSessionAvg || !lastSession) {
+      return [];
+    }
+    const backwardSessions =
+      Math.ceil(songsCount / Math.ceil(Number(songsPerSessionAvg))) - 1;
+
     const songs = await this.repository.find({
       where: [
         {
@@ -129,11 +135,16 @@ export class SongTypeormRepository implements SongRepository {
             ),
           },
         },
-        {
-          danceLogs: { session: IsNull() },
-        },
       ],
     });
+    /**
+     * Si el numero de canciones es igual a el numero de canciones a excluir
+     * no se excluye ninguna cancion ya que todas las canciones han sido bailadas
+     * y por tanto deberia mostrar recorrer una sesion hacia adelante
+     */
+    if (songs.length === songsCount) {
+      return [];
+    }
 
     return songs.map((song) => song.id);
   }

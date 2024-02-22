@@ -14,7 +14,7 @@ export const dataSourceOptions: DataSourceOptions = {
   migrations: [__dirname + '/../database/migrations/*.{js,ts}'],
   synchronize: false,
   // TODO: Remove logging in production
-  logging: true,
+  logging: ['error'],
 };
 const dataSource = new DataSource(dataSourceOptions);
 

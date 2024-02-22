@@ -1,4 +1,4 @@
-import { Between, IsNull, Repository, SelectQueryBuilder } from 'typeorm';
+import { Between, Repository, SelectQueryBuilder } from 'typeorm';
 import { FilterBuilder, IFilterQuery } from 'typeorm-dynamic-filters';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
@@ -85,16 +85,18 @@ export class SongTypeormRepository implements SongRepository {
     };
     const qb = queryBuilder.build(conditions);
     if (danceLogView?.eq === 'true') {
-      const songIds = await this.getSongsIds();
-      if (songIds.length > 0) {
-        qb.andWhere('song.id NOT IN (:...songIds)', { songIds });
+      const excludedSongIds = await this.getIdsOfRecentlyDancedSongs();
+      if (excludedSongIds.length > 0) {
+        qb.andWhere('song.id NOT IN (:...excludedSongIds)', {
+          excludedSongIds,
+        });
       }
     }
 
     return qb;
   }
 
-  async getSongsIds(): Promise<string[]> {
+  async getIdsOfRecentlyDancedSongs(): Promise<string[]> {
     const songsCount = await this.repository.count();
     const { lastSession } = await this.repository
       .createQueryBuilder('song')
@@ -149,6 +151,7 @@ export class SongTypeormRepository implements SongRepository {
      * de canciones menor al promedio de canciones por sesion
      */
     if (songs.length === songsCount) {
+      console.log('Excluding songs from first sessions...');
       let lastSession: number;
       while (songsCount - songs.length <= songsPerSessionAvg) {
         lastSession = songs[0].danceLogs[0].session;

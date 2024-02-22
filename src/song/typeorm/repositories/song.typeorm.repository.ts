@@ -1,4 +1,4 @@
-import { Between, IsNull, Repository, SelectQueryBuilder } from 'typeorm';
+import { Between, Repository, SelectQueryBuilder } from 'typeorm';
 import { FilterBuilder, IFilterQuery } from 'typeorm-dynamic-filters';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
@@ -85,54 +85,81 @@ export class SongTypeormRepository implements SongRepository {
     };
     const qb = queryBuilder.build(conditions);
     if (danceLogView?.eq === 'true') {
-      const songIds = await this.getSongsIds();
-      qb.andWhere('song.id IN (:...songIds)', { songIds });
+      const excludedSongIds = await this.getIdsOfRecentlyDancedSongs();
+      if (excludedSongIds.length > 0) {
+        qb.andWhere('song.id NOT IN (:...excludedSongIds)', {
+          excludedSongIds,
+        });
+      }
     }
 
     return qb;
   }
 
-  async getSongsIds(): Promise<string[]> {
+  async getIdsOfRecentlyDancedSongs(): Promise<string[]> {
     const songsCount = await this.repository.count();
-    const lastSession =
-      (
-        await this.repository
-          .createQueryBuilder('song')
-          .select('MAX(danceLogs.session)', 'lastSession')
-          .leftJoin('song.danceLogs', 'danceLogs')
-          .getRawOne()
-      ).lastSession ?? 0;
-    const songsPerSessionAvg = (
-      await this.repository
-        .createQueryBuilder('dance_log')
-        .select('AVG(num_canciones)', 'songsPerSessionAvg')
-        .from((subQuery) => {
-          return subQuery
-            .select('session, COUNT(*)', 'num_canciones')
-            .from(DanceLogEntity, 'dance_log')
-            .groupBy('session');
-        }, 'conteo_sesiones')
-        .getRawOne()
-    ).songsPerSessionAvg;
-    const backwardSessions = songsPerSessionAvg
-      ? Math.ceil(songsCount / Math.ceil(Number(songsPerSessionAvg)))
-      : 0;
-    const targetSession = lastSession - backwardSessions;
-    const songs = await this.repository.find({
+    const { lastSession } = await this.repository
+      .createQueryBuilder('song')
+      .select('MAX(danceLogs.session)', 'lastSession')
+      .leftJoin('song.danceLogs', 'danceLogs')
+      .getRawOne<{ lastSession: number | null }>();
+    const songsPerSessionAvg = Math.ceil(
+      Number(
+        (
+          await this.repository
+            .createQueryBuilder('dance_log')
+            .select('AVG(songs_per_session)', 'songsPerSessionAvg')
+            .from((subQuery) => {
+              return subQuery
+                .select('session, COUNT(*)', 'songs_per_session')
+                .from(DanceLogEntity, 'dance_log')
+                .groupBy('session');
+            }, 'session_count')
+            .getRawOne<{ songsPerSessionAvg: string | null }>()
+        ).songsPerSessionAvg,
+      ),
+    );
+    /**
+     * Si el promedio de canciones por sesión es nulo o 0 o la ultima sesion es
+     * nula o 0, no se ha bailado, por lo que no hay canciones que excluir
+     */
+    if (!songsPerSessionAvg || !lastSession) {
+      return [];
+    }
+    const backwardSessions = Math.ceil(songsCount / songsPerSessionAvg) - 1;
+    let songs = await this.repository.find({
       where: [
         {
           danceLogs: {
             session: Between(
-              targetSession - 2 > 0 ? targetSession - 2 : 0,
-              targetSession,
+              lastSession - backwardSessions > 0
+                ? lastSession - backwardSessions
+                : 0,
+              lastSession,
             ),
           },
         },
-        {
-          danceLogs: { session: IsNull() },
-        },
       ],
+      relations: ['danceLogs'],
     });
+    /**
+     * Si el numero de canciones es igual a el numero de canciones a excluir
+     * se iterara sobre las canciones omitiendo las de las primeras sesiones
+     * hasta que la diferencia entre el conteo de canciones y las canciones a devolver
+     * sea superior al promedio de canciones por sesion, de esta manera se asegura
+     * que se devuelvan canciones de sesiones distintas y que nunca se tenga un numero
+     * de canciones menor al promedio de canciones por sesion
+     */
+    if (songs.length === songsCount) {
+      console.log('Excluding songs from first sessions...');
+      let lastSession: number;
+      while (songsCount - songs.length <= songsPerSessionAvg) {
+        lastSession = songs[0].danceLogs[0].session;
+        songs = songs.filter(
+          (song) => song.danceLogs[0].session !== lastSession,
+        );
+      }
+    }
 
     return songs.map((song) => song.id);
   }

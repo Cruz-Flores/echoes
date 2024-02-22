@@ -102,7 +102,7 @@ export class SongTypeormRepository implements SongRepository {
       .createQueryBuilder('song')
       .select('MAX(danceLogs.session)', 'lastSession')
       .leftJoin('song.danceLogs', 'danceLogs')
-      .getRawOne<{ lastSession: number }>();
+      .getRawOne<{ lastSession: number | null }>();
     const songsPerSessionAvg = Math.ceil(
       Number(
         (

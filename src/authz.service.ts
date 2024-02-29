@@ -10,8 +10,10 @@ export class AuthzService {
       const model = 'model.conf';
       // Políticas definidas directamente como un string para el adaptador
       const policies = `
-        p, alice, data1, read
-        p, bob, data2, write
+        p, admin, data1, read, 08:00, 19:00
+        p, user, data2, write, 08:00, 17:00
+        g, alice, admin
+        g, bob, user
       `;
       const adapter = new StringAdapter(policies);
       this.enforcer = await newEnforcer(model, adapter);
@@ -25,6 +27,8 @@ export class AuthzService {
     act: string,
   ): Promise<boolean> {
     const enforcer = await this.getEnforcer();
-    return enforcer.enforce(sub, obj, act);
+    // Simulando una hora actual en formato HH:MM para el ejemplo
+    const currentTime = new Date().toTimeString().substring(0, 5);
+    return enforcer.enforce(sub, obj, act, currentTime);
   }
 }

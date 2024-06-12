@@ -49,7 +49,7 @@ export class SongTypeormRepository implements SongRepository {
   }
 
   async save(song: Song): Promise<void> {
-    const songEntity = this.repository.create({
+    const songEntity: SongEntity = {
       id: song.getId(),
       level: song.getLevel(),
       perceivedLevel: song.getPerceivedLevel(),
@@ -57,7 +57,7 @@ export class SongTypeormRepository implements SongRepository {
       name: song.getName(),
       kcalsAverage: song.getKcalsAverage(),
       bodyImpact: song.getBodyImpact(),
-    });
+    };
     await this.repository.save(songEntity);
 
     return void 0;

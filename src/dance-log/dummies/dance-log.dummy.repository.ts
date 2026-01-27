@@ -9,7 +9,9 @@ export class DanceLogDummyRepository implements DanceLogRepository {
     const danceLog = DanceLog.of({
       id: '123',
       kcal: 123,
-      session: 123,
+      sessionId: '123e4567-e89b-12d3-a456-426614174000',
+      dancedAt: new Date(),
+      wasOmitted: false,
     });
     const song = Song.of({
       id: '123',
@@ -39,17 +41,23 @@ export class DanceLogDummyRepository implements DanceLogRepository {
       DanceLog.of({
         id: '123',
         kcal: 123,
-        session: 123,
+        sessionId: '123e4567-e89b-12d3-a456-426614174000',
+        dancedAt: new Date(),
+        wasOmitted: false,
       }),
       DanceLog.of({
         id: '123',
         kcal: 123,
-        session: 123,
+        sessionId: '123e4567-e89b-12d3-a456-426614174000',
+        dancedAt: new Date(),
+        wasOmitted: false,
       }),
       DanceLog.of({
         id: '123',
         kcal: 123,
-        session: 123,
+        sessionId: '123e4567-e89b-12d3-a456-426614174000',
+        dancedAt: new Date(),
+        wasOmitted: false,
       }),
     ];
     danceLogs.forEach((danceLog) => danceLog.assignSong(song));

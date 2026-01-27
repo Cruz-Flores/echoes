@@ -1,4 +1,11 @@
-import { IsNumber, IsUUID, IsNotEmpty } from 'class-validator';
+import {
+  IsNumber,
+  IsUUID,
+  IsNotEmpty,
+  IsBoolean,
+  IsDateString,
+  IsOptional,
+} from 'class-validator';
 
 export class CreateDanceLogDTO {
   @IsUUID()
@@ -9,11 +16,19 @@ export class CreateDanceLogDTO {
   @IsNotEmpty()
   readonly songId: string;
 
+  @IsUUID()
+  @IsNotEmpty()
+  readonly sessionId: string;
+
   @IsNumber()
   @IsNotEmpty()
   readonly kcal: number;
 
-  @IsNumber()
+  @IsBoolean()
+  @IsOptional()
+  readonly wasOmitted?: boolean;
+
+  @IsDateString()
   @IsNotEmpty()
-  readonly session: number;
+  readonly dancedAt: string;
 }

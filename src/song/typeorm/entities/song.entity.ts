@@ -1,32 +1,11 @@
 import { Version } from '@echoes/core';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+
 import {
-  Column,
-  Entity,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  ValueTransformer,
-} from 'typeorm';
-
+  DecimalTransformer,
+  IntTransformer,
+} from '../../../common/helpers/typeorm/transformers';
 import { DanceLogEntity } from '../../../dance-log/typeorm/entities/dance-log.entity';
-
-//TODO: Move this to a common place
-export class DecimalTransformer implements ValueTransformer {
-  to(value: number): number {
-    return value;
-  }
-  from(value: string): number {
-    return parseFloat(value);
-  }
-}
-
-class IntTransformer implements ValueTransformer {
-  to(value: number): number {
-    return value;
-  }
-  from(value: string): number {
-    return parseInt(value, 10);
-  }
-}
 
 @Entity('songs')
 export class SongEntity {

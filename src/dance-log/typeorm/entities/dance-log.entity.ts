@@ -6,10 +6,8 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import {
-  DecimalTransformer,
-  SongEntity,
-} from '../../../song/typeorm/entities/song.entity';
+import { DecimalTransformer } from '../../../common/helpers/typeorm/transformers';
+import { SongEntity } from '../../../song/typeorm/entities/song.entity';
 import { DanceSessionEntity } from '../../../dance-session/typeorm/entities/dance-session.entity';
 
 @Entity('dance_logs')

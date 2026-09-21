@@ -48,7 +48,9 @@ export class DanceLogTypeormRepository implements DanceLogRepository {
     const danceLogEntity = this.repository.create({
       id: danceLog.getId(),
       kcal: danceLog.getKcal(),
-      session: danceLog.getSession(),
+      sessionId: danceLog.getSessionId(),
+      wasOmitted: danceLog.getWasOmitted(),
+      dancedAt: danceLog.getDancedAt(),
       song: danceLog.getSong(),
     });
     await this.repository.save(danceLogEntity);
@@ -85,7 +87,9 @@ export class DanceLogTypeormRepository implements DanceLogRepository {
   build({
     id,
     kcal,
-    session,
+    sessionId,
+    wasOmitted,
+    dancedAt,
     song: {
       id: songId,
       level,
@@ -108,7 +112,9 @@ export class DanceLogTypeormRepository implements DanceLogRepository {
     const danceLog = DanceLog.of({
       id,
       kcal,
-      session,
+      sessionId,
+      wasOmitted,
+      dancedAt,
     });
     danceLog.assignSong(song);
 

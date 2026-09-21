@@ -4,32 +4,44 @@ export class DanceLog {
   private id: string;
   private song: Song;
   private kcal: number;
-  private session: number;
+  private sessionId: string;
+  private wasOmitted: boolean;
+  private dancedAt: Date;
 
   constructor({
     id,
     kcal,
-    session,
+    sessionId,
+    wasOmitted,
+    dancedAt,
   }: {
     id: string;
     kcal: number;
-    session: number;
+    sessionId: string;
+    wasOmitted: boolean;
+    dancedAt: Date;
   }) {
     this.setId(id);
     this.setKcal(kcal);
-    this.setSession(session);
+    this.setSessionId(sessionId);
+    this.setWasOmitted(wasOmitted);
+    this.setDancedAt(dancedAt);
   }
 
   static of({
     id,
     kcal,
-    session,
+    sessionId,
+    wasOmitted = false,
+    dancedAt,
   }: {
     id: string;
     kcal: number;
-    session: number;
+    sessionId: string;
+    wasOmitted?: boolean;
+    dancedAt: Date;
   }): DanceLog {
-    return new this({ id, kcal, session });
+    return new this({ id, kcal, sessionId, wasOmitted, dancedAt });
   }
 
   assignSong(song: Song) {
@@ -48,8 +60,16 @@ export class DanceLog {
     return this.kcal;
   }
 
-  getSession(): number {
-    return this.session;
+  getSessionId(): string {
+    return this.sessionId;
+  }
+
+  getWasOmitted(): boolean {
+    return this.wasOmitted;
+  }
+
+  getDancedAt(): Date {
+    return this.dancedAt;
   }
 
   private setId(id: string) {
@@ -64,7 +84,15 @@ export class DanceLog {
     this.kcal = kcal;
   }
 
-  private setSession(session: number) {
-    this.session = session;
+  private setSessionId(sessionId: string) {
+    this.sessionId = sessionId;
+  }
+
+  private setWasOmitted(wasOmitted: boolean) {
+    this.wasOmitted = wasOmitted;
+  }
+
+  private setDancedAt(dancedAt: Date) {
+    this.dancedAt = dancedAt;
   }
 }

@@ -1,14 +1,14 @@
-version: '3.3'
+version: "3.3"
 
 services:
   postgres:
-    image: postgres:13
+    image: postgres:15
     environment:
       - POSTGRES_DB=echoes
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=123456
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
   pgadmin:

@@ -10,6 +10,7 @@ import {
   DecimalTransformer,
   SongEntity,
 } from '../../../song/typeorm/entities/song.entity';
+import { DanceSessionEntity } from '../../../dance-session/typeorm/entities/dance-session.entity';
 
 @Entity('dance_logs')
 export class DanceLogEntity {
@@ -27,6 +28,16 @@ export class DanceLogEntity {
   @Column({ nullable: false, type: 'char', name: 'song_id' })
   songId: string;
 
+  @ManyToOne(() => DanceSessionEntity, (session) => session.danceLogs, {
+    onDelete: 'RESTRICT',
+    nullable: false,
+  })
+  @JoinColumn({ name: 'session_id' })
+  session: DanceSessionEntity;
+
+  @Column({ nullable: false, type: 'char', name: 'session_id' })
+  sessionId: string;
+
   @Column({
     nullable: false,
     type: 'decimal',
@@ -36,8 +47,20 @@ export class DanceLogEntity {
   })
   kcal: number;
 
-  @Column({ nullable: false, type: 'int' })
-  session: number;
+  @Column({
+    nullable: false,
+    type: 'boolean',
+    name: 'was_omitted',
+    default: false,
+  })
+  wasOmitted: boolean;
+
+  @Column({
+    nullable: false,
+    type: 'timestamp',
+    name: 'danced_at',
+  })
+  dancedAt: Date;
 
   @Column({
     nullable: false,

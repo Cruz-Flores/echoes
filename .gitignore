@@ -53,3 +53,4 @@ test-output
 .env
 
 postgres_data
+vite.config.*.timestamp*

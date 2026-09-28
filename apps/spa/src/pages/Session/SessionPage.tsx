@@ -2,18 +2,29 @@ import { useEffect, useState, useContext } from 'react';
 import { SongList } from '../../features/songs/ui/SongList';
 import { SessionStats } from '../../features/sessions/ui/SessionStats';
 import { LogOtherSong } from '../../features/sessions/ui/LogOtherSong';
+import { CycleDancedSongs } from '../../features/sessions/ui/CycleDancedSongs';
 import { useField } from '../../shared/hooks/useField';
 import { useSongs } from '../../features/songs/hooks/useSong';
 import { sessionStorage } from '../../features/sessions/storage/sessionStorage';
 import { useDanceSession } from '../../features/sessions/hooks/useDanceSession';
-import { buildSessionPlaylist } from '../../features/sessions/hooks/useSessionPlaylist';
+// Session-based playlist stays in useSessionPlaylist.ts so it can be recovered.
+// import { buildSessionPlaylist } from '../../features/sessions/hooks/useSessionPlaylist';
 import {
   buildCyclePlaylist,
   addSongToCycle,
 } from '../../features/sessions/hooks/useCyclePlaylist';
-import { useDanceLog } from '../../features/sessions/hooks/useDanceLog';
+// import { useDanceLog } from '../../features/sessions/hooks/useDanceLog';
 import { StatsSessionContext } from '../../StatsSessionProvider';
-import type { Song, PlaylistAlgorithm } from '../../shared/types';
+import type { Song } from '../../shared/types';
+// import type { Song, PlaylistAlgorithm } from '../../shared/types';
+
+function readCycleSongIds(): string[] {
+  const cycle = sessionStorage.getCurrentCycle();
+  if (!cycle || !Array.isArray(cycle.songIds)) {
+    return [];
+  }
+  return [...cycle.songIds];
+}
 
 export const SessionPage = () => {
   const [songs, setSongs] = useState<Song[]>([]);
@@ -23,13 +34,10 @@ export const SessionPage = () => {
   const [activeSessionId, setActiveSessionId] = useState<string | null>(() =>
     sessionStorage.getActiveSessionId(),
   );
-  const [selectedAlgorithm, setSelectedAlgorithm] = useState<PlaylistAlgorithm>(
-    () => sessionStorage.getPlaylistAlgorithm(),
-  );
-  const [cycleSize, setCycleSize] = useState(() => {
-    const cycle = sessionStorage.getCurrentCycle();
-    return cycle ? cycle.songIds.length : 0;
-  });
+  // const [selectedAlgorithm, setSelectedAlgorithm] = useState<PlaylistAlgorithm>(
+  //   () => sessionStorage.getPlaylistAlgorithm(),
+  // );
+  const [cycleSongIds, setCycleSongIds] = useState<string[]>(readCycleSongIds);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
 
   const { input: targetSongsInput, reset: resetTargetSongsInput } =
@@ -37,7 +45,7 @@ export const SessionPage = () => {
 
   const { useGetAll: getAllSongs } = useSongs();
   const { createSession, closeSession } = useDanceSession();
-  const { getRecentLogs } = useDanceLog();
+  // const { getRecentLogs } = useDanceLog();
 
   const context = useContext(StatsSessionContext);
   const clearStats = context?.clearStats;
@@ -52,29 +60,28 @@ export const SessionPage = () => {
       const newSession = await createSession(targetSongsCount);
       const fetchedSongs = await getAllSongs({});
 
-      let playlistData;
-
-      if (selectedAlgorithm === 'cycle-based') {
-        // Cycle-based algorithm
-        playlistData = buildCyclePlaylist(
-          newSession.id,
-          fetchedSongs,
-          targetSongsCount,
-        );
-      } else {
-        // Session-based algorithm (original)
-        const recentLogs = await getRecentLogs('dancedAt', 'DESC', 200);
-        playlistData = buildSessionPlaylist(
-          newSession.id,
-          fetchedSongs,
-          recentLogs,
-          targetSongsCount,
-        );
-      }
+      // Session-based listing is commented in the front. The algorithm remains
+      // in useSessionPlaylist.ts.
+      // if (selectedAlgorithm === 'cycle-based') {
+      const playlistData = buildCyclePlaylist(
+        newSession.id,
+        fetchedSongs,
+        targetSongsCount,
+      );
+      // } else {
+      //   const recentLogs = await getRecentLogs('dancedAt', 'DESC', 200);
+      //   playlistData = buildSessionPlaylist(
+      //     newSession.id,
+      //     fetchedSongs,
+      //     recentLogs,
+      //     targetSongsCount,
+      //   );
+      // }
 
       sessionStorage.setSessionPlaylist(playlistData);
       sessionStorage.setActiveSessionId(newSession.id);
-      sessionStorage.setPlaylistAlgorithm(selectedAlgorithm);
+      // sessionStorage.setPlaylistAlgorithm(selectedAlgorithm);
+      setCycleSongIds(readCycleSongIds());
 
       const playlistSongs = playlistData.songIds
         .map((id: string) => fetchedSongs.find((song: Song) => song.id === id))
@@ -112,12 +119,11 @@ export const SessionPage = () => {
     sessionStorage.addDancedSongId(songId);
     setDancedSongsIds((prev) => [...prev, songId]);
 
-    // If using cycle-based algorithm, add song to cycle
-    if (selectedAlgorithm === 'cycle-based') {
-      addSongToCycle(songId);
-      const cycle = sessionStorage.getCurrentCycle();
-      setCycleSize(cycle ? cycle.songIds.length : 0);
-    }
+    // Session-based mode used to skip this. The front now always tracks the cycle.
+    // if (selectedAlgorithm === 'cycle-based') {
+    addSongToCycle(songId);
+    setCycleSongIds(readCycleSongIds());
+    // }
   };
 
   const handleResetCycle = () => {
@@ -126,7 +132,7 @@ export const SessionPage = () => {
     );
     if (confirmed) {
       sessionStorage.clearCurrentCycle();
-      setCycleSize(0);
+      setCycleSongIds([]);
     }
   };
 
@@ -178,10 +184,10 @@ export const SessionPage = () => {
                     Current Cycle
                   </p>
                   <p className="text-lg font-bold text-blue-700">
-                    {cycleSize} songs
+                    {cycleSongIds.length} songs
                   </p>
                 </div>
-                {cycleSize > 0 && (
+                {cycleSongIds.length > 0 && (
                   <button
                     onClick={handleResetCycle}
                     className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
@@ -190,9 +196,11 @@ export const SessionPage = () => {
                   </button>
                 )}
               </div>
+              <CycleDancedSongs songIds={cycleSongIds} />
             </div>
 
             <form onSubmit={handleSessionSubmit} className="space-y-4">
+              {/* Session-based playlist selector. Recover from here; logic is in useSessionPlaylist.ts.
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Playlist Algorithm
@@ -218,6 +226,7 @@ export const SessionPage = () => {
                     : 'Tracks cycle and resets at 90% of total songs'}
                 </p>
               </div>
+              */}
               <input
                 {...targetSongsInput}
                 min="1"
@@ -280,10 +289,10 @@ export const SessionPage = () => {
                       Current Cycle
                     </p>
                     <p className="text-lg font-bold text-blue-700">
-                      {cycleSize} songs
+                      {cycleSongIds.length} songs
                     </p>
                   </div>
-                  {cycleSize > 0 && (
+                  {cycleSongIds.length > 0 && (
                     <button
                       onClick={handleResetCycle}
                       className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
@@ -292,6 +301,7 @@ export const SessionPage = () => {
                     </button>
                   )}
                 </div>
+                <CycleDancedSongs songIds={cycleSongIds} />
               </div>
             </div>
           </div>

@@ -2,8 +2,10 @@ import { useEffect, useState, useContext } from 'react';
 import { SongList } from '../../features/songs/ui/SongList';
 import { SessionStats } from '../../features/sessions/ui/SessionStats';
 import { LogOtherSong } from '../../features/sessions/ui/LogOtherSong';
-import { CycleDancedSongs } from '../../features/sessions/ui/CycleDancedSongs';
+import { ActiveSessionLayout } from '../../features/sessions/ui/ActiveSessionLayout';
+import { CycleOverview } from '../../features/sessions/ui/CycleOverview';
 import { useField } from '../../shared/hooks/useField';
+import { useToggle } from '../../shared/hooks/useToggle';
 import { useSongs } from '../../features/songs/hooks/useSong';
 import { sessionStorage } from '../../features/sessions/storage/sessionStorage';
 import { useDanceSession } from '../../features/sessions/hooks/useDanceSession';
@@ -39,6 +41,7 @@ export const SessionPage = () => {
   // );
   const [cycleSongIds, setCycleSongIds] = useState<string[]>(readCycleSongIds);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
+  const { isOn: isCycleOpen, toggle: toggleCycle } = useToggle(true);
 
   const { input: targetSongsInput, reset: resetTargetSongsInput } =
     useField('number');
@@ -168,7 +171,7 @@ export const SessionPage = () => {
     <>
       {!activeSessionId ? (
         <div className="flex-1 flex items-center justify-center bg-gray-50">
-          <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+          <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-3xl">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">
               Start Session
             </h2>
@@ -177,27 +180,12 @@ export const SessionPage = () => {
             </p>
 
             {/* Cycle Info */}
-            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-blue-900">
-                    Current Cycle
-                  </p>
-                  <p className="text-lg font-bold text-blue-700">
-                    {cycleSongIds.length} songs
-                  </p>
-                </div>
-                {cycleSongIds.length > 0 && (
-                  <button
-                    onClick={handleResetCycle}
-                    className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
-                  >
-                    Reset Cycle
-                  </button>
-                )}
-              </div>
-              <CycleDancedSongs songIds={cycleSongIds} />
-            </div>
+            <CycleOverview
+              songIds={cycleSongIds}
+              onReset={handleResetCycle}
+              defaultExpanded
+              className="mb-6 rounded-md border border-blue-200 bg-blue-50 p-4"
+            />
 
             <form onSubmit={handleSessionSubmit} className="space-y-4">
               {/* Session-based playlist selector. Recover from here; logic is in useSessionPlaylist.ts.
@@ -244,20 +232,26 @@ export const SessionPage = () => {
           </div>
         </div>
       ) : (
-        <div className="flex flex-col h-full">
-          {/* Fixed Header Section */}
-          <div className="flex-none bg-white border-b border-gray-200 shadow-md">
-            <div className="max-w-3xl mx-auto p-4 space-y-4">
-              {/* Components */}
-              {/* Log Other Song */}
+        <ActiveSessionLayout
+          isCycleOpen={isCycleOpen}
+          onShowCycle={toggleCycle}
+          cycle={
+            <CycleOverview
+              songIds={cycleSongIds}
+              onReset={handleResetCycle}
+              direction="column"
+              isExpanded
+              onToggle={toggleCycle}
+            />
+          }
+          header={
+            <>
               <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                 <LogOtherSong
                   sessionId={activeSessionId!}
                   onSongLogged={handleSongDanced}
                 />
               </div>
-
-              {/* Session Info */}
               <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                 <div className="flex items-center justify-between">
                   <div>
@@ -280,44 +274,16 @@ export const SessionPage = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Cycle Info */}
-              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-blue-900">
-                      Current Cycle
-                    </p>
-                    <p className="text-lg font-bold text-blue-700">
-                      {cycleSongIds.length} songs
-                    </p>
-                  </div>
-                  {cycleSongIds.length > 0 && (
-                    <button
-                      onClick={handleResetCycle}
-                      className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
-                    >
-                      Reset Cycle
-                    </button>
-                  )}
-                </div>
-                <CycleDancedSongs songIds={cycleSongIds} />
-              </div>
-            </div>
-          </div>
-
-          {/* Scrollable Content Section */}
-          <div className="flex-1 overflow-y-auto bg-gray-100">
-            <div className="max-w-7xl mx-auto p-4">
-              <SongList
-                sessionId={activeSessionId!}
-                songs={visibleSongs}
-                refreshUpdatedSong={refreshUpdatedSong}
-                onSongDanced={handleSongDanced}
-              />
-            </div>
-          </div>
-        </div>
+            </>
+          }
+        >
+          <SongList
+            sessionId={activeSessionId!}
+            songs={visibleSongs}
+            refreshUpdatedSong={refreshUpdatedSong}
+            onSongDanced={handleSongDanced}
+          />
+        </ActiveSessionLayout>
       )}
     </>
   );

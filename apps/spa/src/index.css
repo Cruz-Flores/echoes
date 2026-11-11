@@ -1,0 +1,12 @@
+@import 'tailwindcss';
+
+@layer base {
+  body {
+    font-family:
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      sans-serif;
+  }
+}
